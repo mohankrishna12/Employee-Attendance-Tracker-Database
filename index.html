@@ -1,0 +1,52 @@
+-- Create Employee table
+CREATE TABLE Employee (
+    EmployeeID INT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Department VARCHAR(50) NOT NULL
+);
+
+-- Create Attendance table
+CREATE TABLE Attendance (
+    AttendanceID INT PRIMARY KEY,
+    EmployeeID INT,
+    Date DATE NOT NULL,
+    CheckIn TIME,
+    CheckOut TIME,
+    CONSTRAINT FK_AttendanceEmployee FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID)
+);
+
+-- Insert sample data
+
+INSERT INTO Employee VALUES
+(1, 'John Doe', 'Sales'),
+(2, 'Jane Smith', 'Engineering'),
+(3, 'Michael Brown', 'HR');
+
+INSERT INTO Attendance VALUES
+(1, 1, '2025-09-15', '09:00:00', '17:00:00'),
+(2, 2, '2025-09-15', '09:30:00', '18:00:00'),
+(3, 3, '2025-09-15', '08:45:00', '17:15:00'),
+(4, 1, '2025-09-16', '09:05:00', '17:10:00');
+
+-- Query: Attendance report for a given employee
+SELECT Date, CheckIn, CheckOut,
+   TIMESTAMPDIFF(HOUR, CheckIn, CheckOut) AS HoursWorked
+FROM Attendance
+WHERE EmployeeID = 1
+ORDER BY Date;
+
+-- Query: Total hours worked by each employee on a specific date
+SELECT E.Name, E.Department,
+   SEC_TO_TIME(SUM(TIMESTAMPDIFF(SECOND, A.CheckIn, A.CheckOut))) AS TotalHours
+FROM Attendance A
+JOIN Employee E ON A.EmployeeID = E.EmployeeID
+WHERE A.Date = '2025-09-15'
+GROUP BY E.EmployeeID, E.Name, E.Department;
+
+-- Query: Attendance report for all employees in Engineering department
+SELECT E.Name, A.Date, A.CheckIn, A.CheckOut
+FROM Attendance A
+JOIN Employee E ON A.EmployeeID = E.EmployeeID
+WHERE E.Department = 'Engineering'
+ORDER BY A.Date;
+
